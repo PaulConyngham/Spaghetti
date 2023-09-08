@@ -4,11 +4,14 @@ const settingsContext = createContext({});
 
 export function SettingsProvider({ children }) {
   const [tracing, setTracing] = useState(true)
+  const [formModal, setFormModal] = useState()
   // searchedData used to hold temporary filtered data based on user search text input feature
 
   const value = {
     tracing,
     setTracing,
+    formModal,
+    setFormModal,
   }
 
   return (

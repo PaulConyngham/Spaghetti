@@ -11,6 +11,8 @@
 
 import { useChartData } from "@/context/chart"
 import { useEffect, useState } from "react"
+import { ModalDataForm } from "@/components/Modals"
+import { useSettings } from "@/context/settings"
 
 function THeader({ children }) {
   return (
@@ -74,6 +76,9 @@ export function Table({
     data: originalData,
     setData,
   } = useChartData()
+  const {
+    setFormModal
+  } = useSettings()
 
   useEffect(() => {
     const start = (page-1)*SHOWN_DATA
@@ -97,6 +102,10 @@ export function Table({
       newPartial.push(data[(page * SHOWN_DATA) - 1])
     }
     setData(newData)
+  }
+
+  function setEditData(data) {
+    setFormModal([data, title==='Instruction' ? 'input':'output'])
   }
 
   return (
@@ -136,7 +145,7 @@ export function Table({
               <span>Add data</span>
             </TableButton>
         </div>
-    </div>
+      </div>
 
     {/* <div className="mt-6 md:flex md:items-center md:justify-between">
         <div className="inline-flex overflow-hidden bg-white border divide-x rounded-lg dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700">
@@ -146,66 +155,74 @@ export function Table({
         </div>
     </div> */}
 
-    <div className="flex flex-col mt-6">
-      <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-              <div className="overflow-hidden border border-gray-700 md:rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-700">
-                      <thead className="bg-gray-900">
-                          <tr>
-                            {
-                              headers.map(hd => (
-                                <THeader key={hd}>
-                                  {hd}
-                                </THeader>
-                              ))
-                            }
-                            <th className="max-w-[32px]"></th>
-                          </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-700 bg-gray-800">
-                        {
-                          partialData.map((dt,idx) => (
-                            <tr key={idx}>
-                              {dataKey.map((dk,jdx) => (
-                                <TData key={`${idx}-${jdx}`}>
-                                  <p className="overflow-hidden whitespace-nowrap overflow-ellipsis max-w-[120px]" title={dt[dk]}>
-                                    {dt[dk] || '-'}
-                                  </p>
-                                </TData>
-                              ))}
-                              <td className="relative px-2 py-[2px]">
-                                <button
-                                  className="px-0 py-0 text-gray-100 transition-colors duration-200 rounded-lg bg-gray-600"
-                                  onClick={() => openMenu(idx)}
-                                >
-                                  <ThreeDotIcon />
-                                  {
-                                    showMenuIdx === idx ?
-                                    <div className="absolute left-[-90px] bottom-1 bg-white text-gray-800 text-sm border border-gray-700 rounded-lg">
-                                      <ul className="space-y-2 text-left">
-                                        <li className="hover:bg-gray-300 px-2 py-1 rounded-lg">Edit data</li>
-                                        <li
-                                          className="hover:bg-gray-300 px-2 py-1 rounded-lg"
-                                          onClick={() => deletePoint(dt,idx)}
-                                        >Delete data</li>
-                                      </ul>
-                                    </div>: 
-                                    ''
-                                  }
-                                </button>
-                              </td>
+      <div className="flex flex-col mt-6">
+        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div className="overflow-hidden border border-gray-700 md:rounded-lg">
+                    <table className="min-w-full divide-y divide-gray-700">
+                        <thead className="bg-gray-900">
+                            <tr>
+                              {
+                                headers.map(hd => (
+                                  <THeader key={hd}>
+                                    {hd}
+                                  </THeader>
+                                ))
+                              }
+                              <th className="max-w-[32px]"></th>
                             </tr>
-                          ))
-                        }
-                      </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+                        </thead>
+                        <tbody className="divide-y divide-gray-700 bg-gray-800">
+                          {
+                            partialData.map((dt,idx) => (
+                              <tr key={idx}>
+                                {dataKey.map((dk,jdx) => (
+                                  <TData key={`${idx}-${jdx}`}>
+                                    <p className="overflow-hidden whitespace-nowrap overflow-ellipsis max-w-[120px]" title={dt[dk]}>
+                                      {dt[dk] || '-'}
+                                    </p>
+                                  </TData>
+                                ))}
+                                <td className="relative px-2 py-[2px]">
+                                  <button
+                                    className="px-0 py-0 text-gray-100 transition-colors duration-200 rounded-lg bg-gray-600"
+                                    onClick={() => openMenu(idx)}
+                                  >
+                                    <ThreeDotIcon />
+                                    {
+                                      showMenuIdx === idx ?
+                                      <div className="absolute left-[-90px] bottom-1 bg-white text-gray-800 text-sm border border-gray-700 rounded-lg">
+                                        <ul className="space-y-2 text-left">
+                                          <li
+                                            className="hover:bg-gray-300 px-2 py-1 rounded-lg"
+                                            data-modal-target="dataFrom"
+                                            onClick={() => setFormModal(dt)}
+                                          >
+                                            Edit data
+                                          </li>
+                                          <li
+                                            className="hover:bg-gray-300 px-2 py-1 rounded-lg"
+                                            onClick={() => deletePoint(dt,idx)}
+                                          >
+                                            Delete data
+                                          </li>
+                                        </ul>
+                                      </div>: 
+                                      ''
+                                    }
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          }
+                        </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+      </div>
 
-    <div className="mt-6 sm:flex sm:items-center sm:justify-between ">
+      <div className="mt-6 sm:flex sm:items-center sm:justify-between ">
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Page <span className="font-medium text-gray-300">{page} of {Math.round(data.length/SHOWN_DATA)}</span> 
         </div>
@@ -246,7 +263,8 @@ export function Table({
                 </svg>
             </button>
         </div>
-    </div>
+      </div>
+      <ModalDataForm />
     </section>
   )
 }
