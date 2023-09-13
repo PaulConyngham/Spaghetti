@@ -178,7 +178,7 @@ export function Table({
                               <tr key={idx}>
                                 {dataKey.map((dk,jdx) => (
                                   <TData key={`${idx}-${jdx}`}>
-                                    <p className="overflow-hidden whitespace-nowrap overflow-ellipsis max-w-[120px]" title={dt[dk]}>
+                                    <p className="overflow-hidden whitespace-nowrap overflow-ellipsis max-w-[640px]" title={dt[dk]}>
                                       {dt[dk] || '-'}
                                     </p>
                                   </TData>
