@@ -35,6 +35,12 @@ export default class PlotInitializer {
       colorscale: 'Electric',
       size: 8,
     },
+    // unselected: {
+    //   marker: {
+    //     color: 'green',
+    //     colorscale: 'none',
+    //   }
+    // }
   };
 
   #DEFAULT_LAYOUT = {
@@ -217,7 +223,13 @@ export default class PlotInitializer {
     const dataProps = {
       type: 'scatter',
       mode: 'markers',
-      marker: {'color': 'red'}
+      marker: {'color': 'red'},
+      // turn other than selected but included in this trace to other color
+      unselected: {
+        marker: {
+          color: 'red'
+        }
+      }
     }
 
     Plotly.addTraces(this.root, {
@@ -298,16 +310,10 @@ export default class PlotInitializer {
           clickedInputIdx.push(point.pointIndex)
           normalizedOutput.push(normalized_output)
           normalizedInput.push(normalized_input)
-          const xList = [point.x]
-          const yList = [point.y]
-          if(this.settings.enableTracing) {
-            xList.push(target_x[point.pointIndex])
-            yList.push(target_y[point.pointIndex])
-          }
 
           this.addMarkPoint(
-            xList,
-            yList,
+            [point.x, target_x[point.pointIndex]],
+            [point.y, target_y[point.pointIndex]],
             clickedName,
             point
           )
@@ -351,36 +357,60 @@ export default class PlotInitializer {
       const instructions_idxs = []
       const output_idxs = []
       const lineCreation = []
+      const markPoints = {
+        x: [],
+        y: [],
+        name: [],
+        point: {}
+      }
       selectedPoints.map(sp => {
         const [
           input,
           output,
         ] = this.pointToNormalizedData(sp)
-        if(this.settings.enableTracing) {
-          if(sp.data.name === this.#INSTRUCTION_NAME) {
+        if(sp.data.name === this.#INSTRUCTION_NAME) {
+          if(this.settings.enableTracing) {
             const linePromise = this.addLine(
               [sp.x, this.output_x[sp.pointIndex]],
               [sp.y, this.output_y[sp.pointIndex]]
             )
             lineCreation.push(linePromise)
-          } else {
+          }
+          markPoints.x.push(sp.x, this.output_x[sp.pointIndex])
+          markPoints.y.push(sp.y, this.output_y[sp.pointIndex])
+          markPoints.name.push('Clicked Instruction')
+        } else {
+          if(this.settings.enableTracing) {
             const linePromise = this.addLine(
               [sp.x, this.instruction_x[sp.pointIndex]],
               [sp.y, this.instruction_y[sp.pointIndex]]
-            )
+              )
             lineCreation.push(linePromise)
           }
+          markPoints.x.push(sp.x, this.instruction_x[sp.pointIndex])
+          markPoints.y.push(sp.y, this.instruction_y[sp.pointIndex])
+          markPoints.name.push('Clicked Answer')
         }
+        markPoints.point = sp
 
         normalized_instruction.push(input)
         instructions_idxs.push(sp.pointIndex)
         normalized_output.push(output)
         output_idxs.push(sp.pointIndex)
       })
-      Promise.all(lineCreation)
-      .then(() => {
-        onEventData(normalized_instruction, instructions_idxs, normalized_output, output_idxs)
-      })
+      console.log('markPoints', markPoints)
+      this.addMarkPoint(
+        markPoints.x,
+        markPoints.y,
+        markPoints.name,
+        markPoints.point,
+      )
+      if(this.settings.enableTracing) {
+        Promise.all(lineCreation)
+        .then(() => {
+          onEventData(normalized_instruction, instructions_idxs, normalized_output, output_idxs)
+        })
+      }
     })
   }
 
@@ -390,7 +420,6 @@ export default class PlotInitializer {
    * TODO: combine pointIndex so that we don't need two object
    */
   pointToNormalizedData(point) {
-    console.log("data", this.data[point.pointIndex])
     const normalized_input = {
       instruction_x: this.data[point.pointIndex].instruction_x,
       instruction_y: this.data[point.pointIndex].instruction_y,

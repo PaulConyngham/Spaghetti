@@ -28,8 +28,10 @@ function App() {
   )
 }
 
-const INSTRUCTION_KEY = ['input', 'instruction_word_count', 'instruction_avg_word_len', 'instruction_x', 'instruction_y']
-const ANSWER_KEY = ['output', 'output_word_count', 'output_avg_word_len', 'output_x', 'output_y']
+const FULL_INSTRUCTION_KEY = ['input', 'instruction_word_count', 'instruction_avg_word_len', 'instruction_x', 'instruction_y']
+const INSTRUCTION_KEY = ['instruction']
+const FULL_ANSWER_KEY = ['output', 'output_word_count', 'output_avg_word_len', 'output_x', 'output_y']
+const ANSWER_KEY = ['output']
 
 function HomePage() {
   const {
